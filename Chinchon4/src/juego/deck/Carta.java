@@ -34,6 +34,10 @@ public class Carta {
         return palo;
     }
     
+    public TipoCarta getTipo(){
+    	return tipo;
+    }
+    
     public String toString() {
         return tipo.getValor() + " " + palo.getPalo();
     }

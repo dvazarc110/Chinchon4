@@ -42,6 +42,8 @@ public class GestorRonda {
                 p.eliminarCarta((p.getMano()).get(0));
             }
         }
+        mazoRobar.deleteCards();
+        mazoDescartes.deleteCards();
     }
     
     

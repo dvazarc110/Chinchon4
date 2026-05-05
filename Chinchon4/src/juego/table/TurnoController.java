@@ -1,10 +1,15 @@
 package juego.table;
 
+import java.util.ArrayList;
+
 import juego.deck.Carta;
+import juego.player.CalcChances;
 import juego.player.CombinadorMano;
 import juego.player.IA;
 import juego.player.IPlayer;
 import juego.player.ResultadoCombinacion;
+import juego.player.SemiCombinadorMano;
+import juego.player.SemiResultadoCombinacion;
 
 public class TurnoController {
 
@@ -15,10 +20,11 @@ public class TurnoController {
         this.ronda = ronda;
     }
 
-    public boolean jugarTurno(IPlayer jugador) {
+    public boolean jugarTurno(IPlayer jugador, int turncont, int playeramount) {
 
     	ConsoleInput input = new ConsoleInput();
     	int choice;
+    	int turn = turncont;
     	String siguiente = "";
         Carta cartaRobada, visible, descartada;
         visible = ronda.verDescartes();
@@ -26,7 +32,13 @@ public class TurnoController {
         System.out.println("Carta de mazo de descartes: " + visible);
         
         if (jugador instanceof IA ia) {
-
+        	
+        	CalcChances c = new CalcChances(new ArrayList<>(), 0.0);
+        	
+        	SemiResultadoCombinacion sr = new SemiCombinadorMano().analizar(jugador.getMano(), jugador);
+        	
+        	
+        	
             if (visible != null && ia.quiereRoboDescarte(visible)) {
                 cartaRobada = ronda.robarDescartes();
             } else {

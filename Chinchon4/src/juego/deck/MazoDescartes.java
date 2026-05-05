@@ -28,4 +28,8 @@ public class MazoDescartes {
 
         return resto;
     }
+    
+    public void deleteCards() {
+    	cartas.clear();
+    }
 }

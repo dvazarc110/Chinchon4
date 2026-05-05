@@ -29,6 +29,7 @@ public class MotorPartida {
     	
     	ConsoleInput input = new ConsoleInput();
     	String siguiente = "";
+    	int turncont;
     	
         inicializarPuntuaciones();
 
@@ -40,13 +41,17 @@ public class MotorPartida {
 
             boolean rondaTerminada = false;
 
+            turncont = 0;
+            
             while (!rondaTerminada) {
 
                 for (IPlayer jugador : gestor.getJugadores()) {
 
                     System.out.println("\nTurno de: " + jugador.getNombre());
-
-                    boolean haCerrado = turnoController.jugarTurno(jugador);
+                    
+                    turncont++;
+                    
+                    boolean haCerrado = turnoController.jugarTurno(jugador, turncont, (gestor.getJugadores()).size());
 
                     if (haCerrado) {
 
@@ -60,8 +65,8 @@ public class MotorPartida {
                 }
             }
             
-            mostrarPuntuaciones();
             eliminarJugadores();
+            mostrarPuntuaciones();
             
             if(!finPartida()) {
             	System.out.println("Introduzca cualquier tecla para pasar a la siguiente ronda: ");

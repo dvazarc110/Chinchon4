@@ -9,35 +9,36 @@ import java.util.Map;
 import juego.deck.Carta;
 import juego.deck.Palo;
 
-public class CombinadorMano {
+public class SemiCombinadorMano {
 
-    public ResultadoCombinacion analizar(List<Carta> mano, IPlayer jugador) {
+    public SemiResultadoCombinacion analizar(List<Carta> mano, IPlayer jugador) {
 
     	List<Carta> sobrantes = new ArrayList<>(mano);
     	List<List<Carta>> grupos = new ArrayList<>();
+    	List<Carta> samecards = new ArrayList<>();
     	Carta samecard;
     	int groupsize;
 
-    	extraerTríosYCuartetos(sobrantes, grupos, mano);
-    	extraerEscaleras(sobrantes, grupos, mano);
+    	extraerPosibTríosYCuartetos(sobrantes, grupos, mano);
+    	extraerPosibEscaleras(sobrantes, grupos, mano);
 
     	groupsize = grupos.size();
 
     	if((groupsize == 2) && (sobrantes.size()>1)) {
-    		samecard = comprobarCombinaciones(grupos);
-    		if(!(samecard == null)) {
-    			if(!analizarCombinaciones(grupos, samecard, mano)) {
-    				selectCombination(grupos, sobrantes, samecard);
+    		samecards = comprobarCombinaciones(grupos);
+    		if(!(samecards.isEmpty())) {
+    			if(!analizarCombinaciones(grupos, samecards, mano)) {
+    				selectCombination(grupos, sobrantes, samecards);
     			}
     		}
     	}else if(groupsize > 2) {
     		removeExtraCard(grupos, sobrantes);
     	}
 
-    	return new ResultadoCombinacion(grupos, sobrantes);
+    	return new SemiResultadoCombinacion(grupos, sobrantes);
     }
 
-    private void extraerTríosYCuartetos(List<Carta> cartas, List<List<Carta>> grupos, List<Carta> mano) {
+    private void extraerPosibTríosYCuartetos(List<Carta> cartas, List<List<Carta>> grupos, List<Carta> mano) {
 
         Map<Integer, List<Carta>> map = new HashMap<>();
 
@@ -49,14 +50,14 @@ public class CombinadorMano {
         }
 
         for (List<Carta> grupo : map.values()) {
-            if (grupo.size() == 3 || grupo.size() == 4) {
+            if (grupo.size() >= 2) {
                 grupos.add(new ArrayList<>(grupo));
                 cartas.removeAll(grupo);
             }
         }
     }
 
-    private void extraerEscaleras(List<Carta> cartas, List<List<Carta>> grupos, List<Carta> mano) {
+    private void extraerPosibEscaleras(List<Carta> cartas, List<List<Carta>> grupos, List<Carta> mano) {
 
         Map<Palo, List<Carta>> porPalo = new HashMap<>();
 
@@ -84,7 +85,7 @@ public class CombinadorMano {
                     if (lista.get(i).getTipo().ordinal() == ant.getTipo().ordinal() + 1) {
                         escalera.add(lista.get(i));
                     } else {
-                        if (escalera.size() >= 3) {
+                        if (escalera.size() >= 2) {
                             grupos.add(new ArrayList<>(escalera));
                             cartas.removeAll(escalera);
                         }
@@ -94,25 +95,26 @@ public class CombinadorMano {
                 }
             }
 
-            if (escalera.size() >= 3) {
+            if (escalera.size() >= 2) {
                 grupos.add(new ArrayList<>(escalera));
                 cartas.removeAll(escalera);
             }
         }
     }
     
-    public Carta comprobarCombinaciones(List<List<Carta>> grupos) {
+    public List<Carta> comprobarCombinaciones(List<List<Carta>> grupos) {
     	List<Carta> comb1 = grupos.get(0);
     	List<Carta> comb2 = grupos.get(1);
+    	List<Carta> samecards = new ArrayList<>();
     	
     	for(Carta c1 : comb1) {
     		for(Carta c2 : comb2) {
         		if(c2 == c1) {
-        			return c2;
+        			 samecards.add(c2);
         		}
         	}
     	}
-    	return null;
+    	return samecards;
     }
     
     public void removeExtraCard(List<List<Carta>> group, List<Carta> sobrantes) {
@@ -175,13 +177,15 @@ public class CombinadorMano {
     	sobrantes.add(combRemoved.get(0));
     }
     
-    public boolean analizarCombinaciones(List<List<Carta>> group, Carta samecard, List<Carta> mano) {
+    public boolean analizarCombinaciones(List<List<Carta>> group, List<Carta> samecards, List<Carta> mano) {
     	List<Carta> comb1 = group.get(0);
+    	List<Carta> comb1_copy = group.get(0);
     	List<Carta> comb1_2 = new ArrayList<>();
     	for(Carta c : comb1) {
     		comb1_2.add(c);
     	}
     	List<Carta> comb2 = group.get(1);
+    	List<Carta> comb2_copy = group.get(1);
     	List<Carta> comb2_2 = new ArrayList<>();
     	for(Carta c : comb2) {
     		comb2_2.add(c);
@@ -193,44 +197,39 @@ public class CombinadorMano {
     	group.remove(comb1);
         group.remove(comb2);
         
-    	comb1.remove(samecard);
-    	comb2.remove(samecard);
+    	comb1.removeAll(samecards);
+    	comb2.removeAll(samecards);
     	
-    	extraerTríosYCuartetos(comb1_2, group1, comb1);
-        extraerEscaleras(comb1_2, group1, comb1);
+    	extraerPosibTríosYCuartetos(comb1_2, group1, comb1);
+        extraerPosibEscaleras(comb1_2, group1, comb1);
     	
         group1size = group1.size();
         
-        extraerTríosYCuartetos(comb2_2, group2, comb2);
-        extraerEscaleras(comb2_2, group2, comb2);
+        extraerPosibTríosYCuartetos(comb2_2, group2, comb2);
+        extraerPosibEscaleras(comb2_2, group2, comb2);
         
         group2size = group2.size();
         
         if((group1size == 1) && (group2size == 1)) {
-        	comb2.add(samecard);
         	group.add(comb1);        	
-        	group.add(comb2);
+        	group.add(comb2_copy);
         	return true;
         }else if((group1size == 0) && (group2size == 1)) {
-        	comb1.add(samecard);
-        	group.add(comb1);        	
+        	group.add(comb1_copy);        	
         	group.add(comb2);
         	return true;
-        }else if((group1size == 1) && (group2size == 0)) {
-        	comb2.add(samecard);        	
+        }else if((group1size == 1) && (group2size == 0)) {       	
         	group.add(comb1);        	
-        	group.add(comb2);
+        	group.add(comb2_copy);
         	return true;
         }else {
-        	comb1.add(samecard);
-        	comb2.add(samecard);
-        	group.add(comb1);        	
-        	group.add(comb2);
+        	group.add(comb1_copy);        	
+        	group.add(comb2_copy);
         	return false;
         }
     }
     
-    public void selectCombination(List<List<Carta>> group, List<Carta> sobrantes, Carta samecard) {
+    public void selectCombination(List<List<Carta>> group, List<Carta> sobrantes, List<Carta> samecards) {
     	List<Carta> comb1 = group.get(0);
     	int group1points = 0;
     	for(Carta c : comb1) {
@@ -247,19 +246,19 @@ public class CombinadorMano {
         group.remove(comb2);
     	
         if(group1points > group2points) {
-        	comb2.remove(samecard);
+        	comb2.removeAll(samecards);
         	group.add(comb1); 
         	for(Carta c : comb2) {
         		sobrantes.add(c);
         	}
         }else if(group1points < group2points) {
-        	comb1.remove(samecard);       	
+        	comb1.removeAll(samecards);       	
         	group.add(comb2);
         	for(Carta c : comb1) {
         		sobrantes.add(c);
         	}
         }else {
-        	comb1.remove(samecard);       	
+        	comb1.removeAll(samecards);       	
         	group.add(comb2);
         	for(Carta c : comb1) {
         		sobrantes.add(c);

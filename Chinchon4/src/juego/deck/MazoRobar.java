@@ -23,4 +23,8 @@ public class MazoRobar {
         Collections.shuffle(lista);
         cartas.addAll(lista);
     }
+    
+    public void deleteCards() {
+    	cartas.clear();
+    }
 }

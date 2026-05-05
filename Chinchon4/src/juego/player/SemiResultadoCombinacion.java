@@ -4,12 +4,12 @@ import java.util.List;
 
 import juego.deck.Carta;
 
-public class ResultadoCombinacion {
+public class SemiResultadoCombinacion {
 
     private List<List<Carta>> combinaciones;
     private List<Carta> sobrantes;
 
-    public ResultadoCombinacion(List<List<Carta>> combinaciones, List<Carta> sobrantes) {
+    public SemiResultadoCombinacion(List<List<Carta>> combinaciones, List<Carta> sobrantes) {
         this.combinaciones = combinaciones;
         this.sobrantes = sobrantes;
     }
